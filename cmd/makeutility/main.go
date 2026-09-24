@@ -84,20 +84,20 @@ func runSync(ctx context.Context) error {
 	states := gitops.Sync(ctx, workspaceDir(), specs, defaultMaxConcurrent)
 
 	tw := tabwriter.NewWriter(os.Stdout, 0, 2, 2, ' ', 0)
-	fmt.Fprintln(tw, "REPO\tRESULT")
+	_, _ = fmt.Fprintln(tw, "REPO\tRESULT")
 	failures := 0
 	for _, s := range states {
 		switch {
 		case s.Err != nil:
 			failures++
-			fmt.Fprintf(tw, "%s\t%serror: %v%s\n", s.Name, ansiRed, s.Err, ansiReset)
+			_, _ = fmt.Fprintf(tw, "%s\t%serror: %v%s\n", s.Name, ansiRed, s.Err, ansiReset)
 		case s.Cloned:
-			fmt.Fprintf(tw, "%s\t%scloned%s\n", s.Name, ansiGreen, ansiReset)
+			_, _ = fmt.Fprintf(tw, "%s\t%scloned%s\n", s.Name, ansiGreen, ansiReset)
 		default:
-			fmt.Fprintf(tw, "%s\t%sup to date%s\n", s.Name, ansiGreen, ansiReset)
+			_, _ = fmt.Fprintf(tw, "%s\t%sup to date%s\n", s.Name, ansiGreen, ansiReset)
 		}
 	}
-	tw.Flush()
+	_ = tw.Flush()
 
 	if failures > 0 {
 		return fmt.Errorf("%d repo(s) failed to sync", failures)
@@ -114,19 +114,19 @@ func runStatus(ctx context.Context) error {
 	states := gitops.Status(ctx, workspaceDir(), specs, defaultMaxConcurrent)
 
 	tw := tabwriter.NewWriter(os.Stdout, 0, 2, 2, ' ', 0)
-	fmt.Fprintln(tw, "REPO\tBRANCH\tAHEAD\tBEHIND\tSTATE")
+	_, _ = fmt.Fprintln(tw, "REPO\tBRANCH\tAHEAD\tBEHIND\tSTATE")
 	for _, s := range states {
 		if s.Err != nil {
-			fmt.Fprintf(tw, "%s\t-\t-\t-\t%serror: %v%s\n", s.Name, ansiRed, s.Err, ansiReset)
+			_, _ = fmt.Fprintf(tw, "%s\t-\t-\t-\t%serror: %v%s\n", s.Name, ansiRed, s.Err, ansiReset)
 			continue
 		}
 		state := ansiGreen + "clean" + ansiReset
 		if s.Dirty {
 			state = ansiYellow + "dirty" + ansiReset
 		}
-		fmt.Fprintf(tw, "%s\t%s\t%d\t%d\t%s\n", s.Name, s.Branch, s.Ahead, s.Behind, state)
+		_, _ = fmt.Fprintf(tw, "%s\t%s\t%d\t%d\t%s\n", s.Name, s.Branch, s.Ahead, s.Behind, state)
 	}
-	tw.Flush()
+	_ = tw.Flush()
 
 	return nil
 }

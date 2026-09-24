@@ -1,3 +1,5 @@
+// Package api implements the makeutility-api HTTP handlers: the chi
+// router, request/response helpers, and the shared API-key middleware.
 package api
 
 import "net/http"

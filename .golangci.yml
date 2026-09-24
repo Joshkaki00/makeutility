@@ -1,0 +1,52 @@
+version: "2"
+
+# Lint rules for makeutility, aligned with Google's Go Style Guide
+# (https://google.github.io/styleguide/go/decisions). The "standard" set
+# (errcheck, govet, ineffassign, staticcheck, unused) catches bugs; revive
+# is configured below with the specific Google-style idioms this project
+# cares about (doc comments, error string formatting, receiver naming,
+# early return, unused parameters).
+linters:
+  default: standard
+  enable:
+    - revive
+    - misspell
+    - unconvert
+    - unparam
+
+  settings:
+    revive:
+      rules:
+        - name: exported
+          # Every exported name needs a doc comment starting with its own
+          # name (Google style guide, "Doc comments").
+        - name: package-comments
+        - name: error-strings
+          # Error strings must not be capitalized or end in punctuation
+          # (Google style guide, "Errors").
+        - name: error-naming
+        - name: receiver-naming
+          # Receiver names must be short and consistent per type (Google
+          # style guide, "Receiver names").
+        - name: indent-error-flow
+          # Prefer early return over deeply nested error handling (Google
+          # style guide, "Indent error flow").
+        - name: unused-parameter
+        - name: unreachable-code
+        - name: context-as-argument
+          # context.Context must be the first parameter (Google style
+          # guide, "Contexts").
+        - name: context-keys-type
+        - name: time-naming
+        - name: var-naming
+          # MixedCaps naming, not underscores (Google style guide,
+          # "Underscores").
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
