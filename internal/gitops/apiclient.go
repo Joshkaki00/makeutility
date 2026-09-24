@@ -27,7 +27,7 @@ func FetchReposFromAPI(ctx context.Context, baseURL, apiKey string) ([]RepoSpec,
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("makeutility-api returned status %d", resp.StatusCode)
@@ -40,7 +40,7 @@ func FetchReposFromAPI(ctx context.Context, baseURL, apiKey string) ([]RepoSpec,
 
 	specs := make([]RepoSpec, 0, len(repos))
 	for _, r := range repos {
-		specs = append(specs, RepoSpec{Name: r.Name, URL: r.URL})
+		specs = append(specs, RepoSpec(r))
 	}
 	return specs, nil
 }

@@ -227,6 +227,19 @@ because it is wrong):
   - `cmd/makeutility`: CLI entrypoint with `sync` and `status`
     subcommands, table output via `text/tabwriter`.
   - `repos.yaml`: example local fallback repo list.
+- Linting: `golangci-lint` v2.13.2 is installed, configured in
+  `.golangci.yml` with the standard linter set (`errcheck`, `govet`,
+  `ineffassign`, `staticcheck`, `unused`) plus `revive` rules chosen
+  to match Google's Go Style Guide
+  (`google.github.io/styleguide/go/decisions`): required doc comments
+  on exported names and packages, lowercase/no-punctuation error
+  strings, consistent receiver naming, early return over nested error
+  handling, `context.Context` as the first parameter, and MixedCaps
+  naming. `golangci-lint run ./...` currently reports 0 issues; fixes
+  made along the way included removing the deprecated, spoofable
+  `middleware.RealIP` (flagged by `staticcheck`), checking previously
+  ignored `Fprintf`/`Flush` errors (`errcheck`), and adding the
+  missing `internal/api` package doc comment.
 - Not yet started: README, integration testing against a real
   Postgres instance, and the stretch goals (`POST /repos/import`,
   `makeutility open`, rate limiting).
