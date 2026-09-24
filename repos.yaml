@@ -1,0 +1,9 @@
+# Local fallback repo list used by the makeutility CLI when
+# makeutility-api is unreachable. The API (backed by Postgres) is the
+# source of truth; this file exists only so the CLI keeps working
+# offline. See proposal.md for details.
+repos:
+  - name: example-service
+    url: https://github.com/example-org/example-service.git
+  - name: example-shared-lib
+    url: https://github.com/example-org/example-shared-lib.git
