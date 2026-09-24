@@ -203,5 +203,4 @@ bar.
 
 ## License
 
-No license file has been added yet. Treat this as an internal,
-unlicensed project until one is added.
+MIT. See [LICENSE](LICENSE).
