@@ -201,15 +201,21 @@ because it is wrong):
 - Confirmed: router (`chi` v5), data access (`sqlc` plus `pgx/v5`),
   database (PostgreSQL), project layout (flat `cmd/`/`internal/`
   structure), and auth approach (single API key).
-- Environment: the local dev machine has Go 1.27.1; the `sqlc` CLI is
-  not yet installed (`go install
-  github.com/sqlc-dev/sqlc/cmd/sqlc@latest` in progress).
-- Not yet started: `go.mod` init, `cmd/makeutility-api`,
-  `cmd/makeutility`, `internal/api`, `internal/db` (schema, queries,
-  generated code), `internal/gitops` worker pool, `repos.yaml`,
-  `sqlc.yaml`, README.
-- Next step: finish installing `sqlc`, then scaffold the module and
-  generate the first `repos` table plus `GET`/`POST`/`PATCH` queries.
+- Environment: the local dev machine has Go 1.27.1. The `sqlc` CLI
+  (v1.31.1) is installed and verified working.
+- Done: `go.mod` initialized (module
+  `github.com/joshuakaki/makeutility`). Dependencies installed one at
+  a time: `github.com/go-chi/chi/v5@v5.3.2`,
+  `github.com/jackc/pgx/v5@v5.11.0`, `github.com/jackc/pgx/v5/pgxpool`,
+  and `go.yaml.in/yaml/v3@v3.0.5` (the actively maintained fork, since
+  the original `gopkg.in/yaml.v3`/`go-yaml/yaml` repo was archived in
+  2025).
+- Not yet started: `cmd/makeutility-api`, `cmd/makeutility`,
+  `internal/api`, `internal/db` (schema, queries, generated code),
+  `internal/gitops` worker pool, `repos.yaml`, `sqlc.yaml`, README.
+- Next step: scaffold the module directories and write the first
+  `repos` table schema plus `GET`/`POST`/`PATCH` queries, then run
+  `sqlc generate`.
 
 ## Demo plan for retrospective
 
