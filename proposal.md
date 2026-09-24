@@ -203,19 +203,35 @@ because it is wrong):
   structure), and auth approach (single API key).
 - Environment: the local dev machine has Go 1.27.1. The `sqlc` CLI
   (v1.31.1) is installed and verified working.
-- Done: `go.mod` initialized (module
-  `github.com/joshuakaki/makeutility`). Dependencies installed one at
-  a time: `github.com/go-chi/chi/v5@v5.3.2`,
-  `github.com/jackc/pgx/v5@v5.11.0`, `github.com/jackc/pgx/v5/pgxpool`,
-  and `go.yaml.in/yaml/v3@v3.0.5` (the actively maintained fork, since
-  the original `gopkg.in/yaml.v3`/`go-yaml/yaml` repo was archived in
-  2025).
-- Not yet started: `cmd/makeutility-api`, `cmd/makeutility`,
-  `internal/api`, `internal/db` (schema, queries, generated code),
-  `internal/gitops` worker pool, `repos.yaml`, `sqlc.yaml`, README.
-- Next step: scaffold the module directories and write the first
-  `repos` table schema plus `GET`/`POST`/`PATCH` queries, then run
-  `sqlc generate`.
+- Dependencies installed one at a time and confirmed in `go.mod`:
+  `github.com/go-chi/chi/v5@v5.3.2`, `github.com/jackc/pgx/v5@v5.11.0`
+  (with `pgxpool`), `golang.org/x/sync/errgroup@v0.17.0` (bounded
+  worker pool), and `go.yaml.in/yaml/v3@v3.0.5` (the actively
+  maintained fork, since the original `gopkg.in/yaml.v3`/`go-yaml/yaml`
+  repo was archived in 2025).
+- Scaffolded and building cleanly (`go build ./...`, `go vet ./...`,
+  and `go mod tidy` all pass with no errors):
+  - `sqlc.yaml`, `internal/db/schema.sql`, `internal/db/query.sql`, and
+    `sqlc`-generated `db.go`/`models.go`/`query.sql.go` for the `repos`
+    table (`ListRepos`, `GetRepo`, `GetRepoByName`, `CreateRepo`,
+    `UpdateRepo`, `DeleteRepo`).
+  - `internal/api`: `chi` router (`Server.NewServer`), API-key
+    middleware, and handlers for `GET /repos`, `POST /repos`, and
+    `PATCH /repos/{id}`.
+  - `cmd/makeutility-api`: service entrypoint wiring `pgxpool` to the
+    `chi` handler, with graceful shutdown on `SIGINT`/`SIGTERM`.
+  - `internal/gitops`: goroutine worker pool (via
+    `errgroup.SetLimit`) for concurrent `Sync` (clone/fetch/pull) and
+    `Status` (branch, ahead/behind, dirty check), plus the
+    `repos.yaml` loader and the `makeutility-api` HTTP client.
+  - `cmd/makeutility`: CLI entrypoint with `sync` and `status`
+    subcommands, table output via `text/tabwriter`.
+  - `repos.yaml`: example local fallback repo list.
+- Not yet started: README, integration testing against a real
+  Postgres instance, and the stretch goals (`POST /repos/import`,
+  `makeutility open`, rate limiting).
+- Next step: stand up a local Postgres instance, apply
+  `internal/db/schema.sql`, and run the API and CLI end to end.
 
 ## Demo plan for retrospective
 
