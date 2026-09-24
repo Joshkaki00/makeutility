@@ -240,11 +240,31 @@ because it is wrong):
   `middleware.RealIP` (flagged by `staticcheck`), checking previously
   ignored `Fprintf`/`Flush` errors (`errcheck`), and adding the
   missing `internal/api` package doc comment.
-- Not yet started: README, integration testing against a real
-  Postgres instance, and the stretch goals (`POST /repos/import`,
+- Docker: `Dockerfile` (multi-stage `golang` build, `alpine` runtime,
+  non-root user) and `docker-compose.yml` (Postgres plus
+  `makeutility-api`) are added. Every base image is pinned to both a
+  tag and its OCI index digest (`postgres:18.6@sha256:...`,
+  `golang:1.27@sha256:...`, `alpine:3.22@sha256:...`), per current
+  (2026) container supply-chain guidance: tags are mutable pointers,
+  digests are content-addressed and immutable. Digests were obtained
+  with `docker buildx imagetools inspect` and verified to be the
+  multi-arch index digest, not a per-architecture manifest digest, so
+  the same Dockerfile resolves correctly on both amd64 and arm64.
+- Validated end to end: `docker compose up` brings up Postgres (with
+  `internal/db/schema.sql` auto-applied via
+  `docker-entrypoint-initdb.d`) and `makeutility-api` together.
+  Verified live: `GET /healthz`, `POST /repos` (create), `GET /repos`
+  (list), `PATCH /repos/{id}` (update), and that requests without
+  `X-API-Key` are correctly rejected with 401. One real-world fix
+  needed along the way: Postgres 18+ changed its expected volume
+  mount point from `/var/lib/postgresql/data` to `/var/lib/postgresql`
+  (pre-18 images used the former); the compose file mounts the
+  correct path for 18.x.
+- Not yet started: README and the stretch goals (`POST /repos/import`,
   `makeutility open`, rate limiting).
-- Next step: stand up a local Postgres instance, apply
-  `internal/db/schema.sql`, and run the API and CLI end to end.
+- Next step: write the README (setup instructions for both the
+  Docker-based and local-Go-toolchain workflows), then run the CLI's
+  `sync`/`status` subcommands against the containerized API.
 
 ## Demo plan for retrospective
 
