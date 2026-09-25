@@ -218,10 +218,9 @@ one sprint's worth of usage:
 
 ## Contributing
 
-Run `go build ./...`, `go vet ./...`, and `golangci-lint run ./...`
-before submitting changes. There are no automated tests yet; manual
-verification against a local `docker compose up` stack is the current
-bar.
+Run `go build ./...`, `go vet ./...`, `golangci-lint run ./...`, and
+`go test ./... -race` before submitting changes. If you touched
+`internal/api`, also run the integration suite (see Testing above).
 
 ## License
 
