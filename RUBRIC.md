@@ -24,12 +24,18 @@ Items marked with a star earn bonus points.
   ./...` all pass with zero issues. `docker compose up` was run and
   verified end to end: `GET /healthz`, `POST /repos`, `GET /repos`,
   and `PATCH /repos/{id}` all work against a real PostgreSQL instance.
-- **#2**: not yet submitted to goreportcard.com (requires a public
-  repo URL). `golangci-lint`, which covers the same underlying
-  checks (`gofmt`, `go vet`, `ineffassign`, `staticcheck`, plus
-  `revive` in place of the retired `golint`), reports zero issues, so
-  this is expected to score well once submitted, but is left
-  unchecked until actually verified on the real site.
+- **#2**: goreportcard.com has been **sunset** (confirmed by fetching
+  both the homepage and this repo's report URL as of this commit --
+  both show a shutdown notice, not a grading error). It can no longer
+  be submitted to at all, through no fault of this repo. The site's
+  own shutdown notice names `golangci-lint` as "the de-facto standard
+  for Go code quality today... the spiritual successor to the
+  metalinter that powered Go Report Card" -- and `golangci-lint run
+  ./...` reports zero issues here. Left unchecked pending guidance
+  from whoever owns the rubric on how to substitute for a
+  now-nonexistent external service; self-hosting
+  github.com/gojp/goreportcard (the still-open-source engine) is a
+  fallback if an actual letter grade is required.
 - **#3**: `chi`, `pgx/v5`, `sqlc`-generated code, and
   `go.yaml.in/yaml/v3` are all real external dependencies in active
   use, not stubs.
