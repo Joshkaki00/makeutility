@@ -47,9 +47,18 @@ Items marked with a star earn bonus points.
   (`TestLoadReposYAML`, 5 cases), `internal/gitops/status_test.go`
   (`TestStatus`, against real temp git repos), `internal/api/
   middleware_test.go` (`TestApiKeyAuth`, 4 cases), and
-  `internal/api/repos_test.go` (`TestToRepo`, `TestToRepos`).
+  `internal/api/repos_test.go` (`TestToRepo`, `TestToRepos`). Two
+  further tiers, kept behind a build tag so the default suite stays
+  fast: `internal/api/integration_test.go` runs the real HTTP handlers
+  against a disposable Postgres container (testcontainers-go), covering
+  create/list/update, partial updates, 404s, auth rejection, and the
+  database's real UNIQUE constraint (`go test -tags=integration
+  ./internal/api/...`) -- verified passing against an actual running
+  Docker daemon, not just compiled.
 - **#9**: `BenchmarkStatus` in `internal/gitops/status_test.go`,
   measuring the concurrent (`errgroup`-bounded) repo status-check path
   against 8 real local git repos.
 - **#0**: `go test ./...` and `go test ./... -race` both pass with no
-  failures.
+  failures; `go test -tags=integration ./internal/api/...` also passes
+  against a real container when Docker is available, and skips itself
+  cleanly (does not fail) when it isn't.
