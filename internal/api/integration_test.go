@@ -52,7 +52,6 @@ func newTestServer(t *testing.T) *httptest.Server {
 		postgres.WithDatabase("makeutility_test"),
 		postgres.WithUsername("test"),
 		postgres.WithPassword("test"),
-		postgres.WithInitScripts(),
 		tc.WithWaitStrategy(
 			wait.ForLog("database system is ready to accept connections").
 				WithOccurrence(2).
