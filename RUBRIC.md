@@ -13,9 +13,9 @@ Items marked with a star earn bonus points.
 | 5 | +0.5 | README contains description | x |
 | 6 | +0.5 | README contains screenshot OR install instructions | x |
 | 7 | +0.5 | README contains example of how to use the program | x |
-| 8 | +1.0 | 2 or more table-driven tests | |
-| 9 | +0.5 | 1 or more benchmark tests | |
-| 0 | +1.5 | All tests pass | |
+| 8 | +1.0 | 2 or more table-driven tests | x |
+| 9 | +0.5 | 1 or more benchmark tests | x |
+| 0 | +1.5 | All tests pass | x |
 | - | +0.0 | Academic dishonesty: code copied from another student | n/a |
 
 ## Notes on current status (as of this commit)
@@ -37,5 +37,13 @@ Items marked with a star earn bonus points.
   local file-based fallback for the CLI.
 - **#5, #6, #7**: see `README.md` (description, Docker/local install
   instructions, and `curl`/CLI usage examples).
-- **#8, #9, #0**: no test files exist yet in the repository. This is
-  the main outstanding gap.
+- **#8**: table-driven tests in `internal/gitops/config_test.go`
+  (`TestLoadReposYAML`, 5 cases), `internal/gitops/status_test.go`
+  (`TestStatus`, against real temp git repos), `internal/api/
+  middleware_test.go` (`TestApiKeyAuth`, 4 cases), and
+  `internal/api/repos_test.go` (`TestToRepo`, `TestToRepos`).
+- **#9**: `BenchmarkStatus` in `internal/gitops/status_test.go`,
+  measuring the concurrent (`errgroup`-bounded) repo status-check path
+  against 8 real local git repos.
+- **#0**: `go test ./...` and `go test ./... -race` both pass with no
+  failures.
