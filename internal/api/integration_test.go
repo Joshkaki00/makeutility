@@ -93,10 +93,19 @@ func newTestServer(t *testing.T) *httptest.Server {
 }
 
 func isDockerUnavailable(err error) bool {
-	msg := err.Error()
-	return strings.Contains(msg, "Cannot connect to the Docker daemon") ||
-		strings.Contains(msg, "docker.sock") ||
-		strings.Contains(msg, "Is the docker daemon running")
+	msg := strings.ToLower(err.Error())
+	for _, needle := range []string{
+		"cannot connect to the docker daemon",
+		"docker.sock",
+		"is the docker daemon running",
+		"docker provider",
+		"rootless docker not found",
+	} {
+		if strings.Contains(msg, needle) {
+			return true
+		}
+	}
+	return false
 }
 
 func doJSON(t *testing.T, method, url, apiKey string, body any) *http.Response {
