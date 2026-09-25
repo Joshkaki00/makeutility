@@ -169,6 +169,28 @@ To regenerate the sqlc code after editing `internal/db/schema.sql` or
 sqlc generate
 ```
 
+### Testing
+
+Unit tests are fast and dependency-free:
+
+```bash
+go test ./...
+go test ./... -race
+```
+
+Handler tests that need a real database are integration tests, kept
+behind a build tag so `go test ./...` never needs Docker. They start a
+disposable PostgreSQL container (via testcontainers-go), apply the
+real schema, and exercise the actual HTTP handlers -- including the
+database's own UNIQUE constraint, not a mocked version of it:
+
+```bash
+go test -tags=integration ./internal/api/... -v
+```
+
+Requires a running Docker daemon; there is no Docker-less fallback for
+this tier, unlike the CLI's own repos.yaml fallback.
+
 ## Design notes
 
 This project is intentionally scoped lean for a one-sprint internal
