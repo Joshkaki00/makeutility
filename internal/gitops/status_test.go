@@ -2,6 +2,7 @@ package gitops
 
 import (
 	"context"
+	"fmt"
 	"os/exec"
 	"path/filepath"
 	"testing"
@@ -115,26 +116,42 @@ func TestStatus(t *testing.T) {
 
 // BenchmarkStatus measures the concurrent status-check path -- the part
 // of the CLI the README specifically claims finishes "in seconds instead
-// of minutes" via bounded goroutines. Repos are set up once outside the
-// timed loop.
+// of minutes" via bounded goroutines. Repos are set up once outside each
+// timed loop. Multiple repo-count/concurrency shapes are benchmarked
+// separately so a regression in, say, high-concurrency scaling doesn't
+// hide behind a single aggregate number.
 func BenchmarkStatus(b *testing.B) {
 	if _, err := exec.LookPath("git"); err != nil {
 		b.Skip("git not found on PATH")
 	}
 
-	workspace := b.TempDir()
-	const repoCount = 8
-	specs := make([]RepoSpec, repoCount)
-	for i := range specs {
-		name := "repo" + string(rune('a'+i))
-		initRepoForBench(b, workspace, name)
-		specs[i] = RepoSpec{Name: name}
+	cases := []struct {
+		name        string
+		repoCount   int
+		concurrency int
+	}{
+		{name: "4repos_conc1", repoCount: 4, concurrency: 1},
+		{name: "8repos_conc4", repoCount: 8, concurrency: 4},
+		{name: "16repos_conc4", repoCount: 16, concurrency: 4},
+		{name: "16repos_conc16", repoCount: 16, concurrency: 16},
 	}
 
 	ctx := context.Background()
 
-	for b.Loop() {
-		Status(ctx, workspace, specs, 4)
+	for _, tc := range cases {
+		b.Run(tc.name, func(b *testing.B) {
+			workspace := b.TempDir()
+			specs := make([]RepoSpec, tc.repoCount)
+			for i := range specs {
+				name := fmt.Sprintf("repo%03d", i)
+				initRepoForBench(b, workspace, name)
+				specs[i] = RepoSpec{Name: name}
+			}
+
+			for b.Loop() {
+				Status(ctx, workspace, specs, tc.concurrency)
+			}
+		})
 	}
 }
 
