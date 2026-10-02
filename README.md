@@ -235,9 +235,8 @@ one sprint's worth of usage:
 
 ## Contributing
 
-Run `go build ./...`, `go vet ./...`, `golangci-lint run ./...`, and
-`go test ./... -race` before submitting changes. If you touched
-`internal/api`, also run the integration suite (see Testing above).
+This project is not accepting external contributions. Issues and pull
+requests will not be reviewed.
 
 ## License
 
