@@ -97,7 +97,9 @@ CLI if you plan to change the schema or queries.
 2. Run the API:
 
    ```bash
-   export DATABASE_URL="postgres://user:pass@localhost:5432/makeutility?sslmode=disable"
+   # If using only Compose's Postgres container, match its credentials:
+   # postgres://makeutility:makeutility@localhost:5432/makeutility?sslmode=disable
+   export DATABASE_URL="postgres://postgres:postgres@localhost:5432/makeutility?sslmode=disable"
    export MAKEUTILITY_API_KEY="dev-local-only-key"
    go run ./cmd/makeutility-api
    ```
@@ -108,7 +110,7 @@ CLI if you plan to change the schema or queries.
 
 | Variable | Used by | Default | Description |
 |---|---|---|---|
-| `DATABASE_URL` | `makeutility-api` | `postgres://postgres:postgres@localhost:5432/makeutility?sslmode=disable` | PostgreSQL connection string. |
+| `DATABASE_URL` | `makeutility-api` | `postgres://postgres:postgres@localhost:5432/makeutility?sslmode=disable` | PostgreSQL connection string. Compose overrides this to `postgres://makeutility:makeutility@postgres:5432/makeutility?sslmode=disable`. |
 | `MAKEUTILITY_API_KEY` | both | none (required) | Shared secret sent as the `X-API-Key` header on every `/repos` request. |
 | `MAKEUTILITY_API_ADDR` | `makeutility-api` | `:8080` | Address the API listens on. |
 | `MAKEUTILITY_API_URL` | CLI | none | Base URL of `makeutility-api`. If unset, the CLI uses `repos.yaml`. |
@@ -141,6 +143,8 @@ makeutility/
 | Database | PostgreSQL |
 | CLI concurrency | Go standard library (goroutines, golang.org/x/sync/errgroup) |
 | Config fallback | repos.yaml (YAML via go.yaml.in/yaml/v3) |
+| Unit/assert helpers | testify |
+| Integration tests | testcontainers-go (Postgres module) |
 
 Base images in `Dockerfile` and `docker-compose.yml` are pinned to both
 a tag and an OCI index digest (for example `postgres:18.6@sha256:...`)
@@ -153,6 +157,7 @@ tag being overwritten.
 go build ./...
 go vet ./...
 golangci-lint run ./...
+go test ./... -race
 ```
 
 `.golangci.yml` enables the standard linter set plus revive rules
@@ -171,11 +176,21 @@ sqlc generate
 
 ### Testing
 
-Unit tests are fast and dependency-free:
+Unit tests live under `internal/gitops` and `internal/api`. They are
+table-driven where it helps (YAML load, API-key middleware, repo
+mappers, status against real temp git repos) and stay fast -- no Docker
+required:
 
 ```bash
 go test ./...
 go test ./... -race
+```
+
+`BenchmarkStatus` measures the concurrent status path across several
+repo-count / concurrency shapes:
+
+```bash
+go test ./internal/gitops/... -bench=BenchmarkStatus -benchtime=1x -run '^$'
 ```
 
 Handler tests that need a real database are integration tests, kept
@@ -185,11 +200,13 @@ real schema, and exercise the actual HTTP handlers -- including the
 database's own UNIQUE constraint, not a mocked version of it:
 
 ```bash
-go test -tags=integration ./internal/api/... -v
+go test -tags=integration ./internal/api/... -v -count=1
 ```
 
-Requires a running Docker daemon; there is no Docker-less fallback for
-this tier, unlike the CLI's own repos.yaml fallback.
+`-count=1` disables the test cache so a prior "Docker unavailable"
+skip is not reused after you start Docker. Requires a running Docker
+daemon; there is no Docker-less fallback for this tier, unlike the
+CLI's own repos.yaml fallback.
 
 ## Design notes
 
