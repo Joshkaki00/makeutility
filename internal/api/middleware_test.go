@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestApiKeyAuth(t *testing.T) {
@@ -16,20 +18,19 @@ func TestApiKeyAuth(t *testing.T) {
 	})
 	handler := apiKeyAuth(expectedKey)(next)
 
-	tests := []struct {
-		name       string
+	tests := map[string]struct {
 		headerKey  string
 		sendHeader bool
 		wantStatus int
 	}{
-		{name: "correct key allowed", headerKey: expectedKey, sendHeader: true, wantStatus: http.StatusOK},
-		{name: "missing header rejected", sendHeader: false, wantStatus: http.StatusUnauthorized},
-		{name: "empty header rejected", headerKey: "", sendHeader: true, wantStatus: http.StatusUnauthorized},
-		{name: "wrong key rejected", headerKey: "wrong-key", sendHeader: true, wantStatus: http.StatusUnauthorized},
+		"correct key allowed":     {headerKey: expectedKey, sendHeader: true, wantStatus: http.StatusOK},
+		"missing header rejected": {sendHeader: false, wantStatus: http.StatusUnauthorized},
+		"empty header rejected":   {headerKey: "", sendHeader: true, wantStatus: http.StatusUnauthorized},
+		"wrong key rejected":      {headerKey: "wrong-key", sendHeader: true, wantStatus: http.StatusUnauthorized},
 	}
 
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
 			req := httptest.NewRequest(http.MethodGet, "/repos", nil)
@@ -40,13 +41,9 @@ func TestApiKeyAuth(t *testing.T) {
 
 			handler.ServeHTTP(rec, req)
 
-			if rec.Code != tc.wantStatus {
-				t.Errorf("status = %d, want %d (body: %s)", rec.Code, tc.wantStatus, rec.Body.String())
-			}
+			assert.Equal(t, tc.wantStatus, rec.Code, "body: %s", rec.Body.String())
 			if tc.wantStatus == http.StatusUnauthorized {
-				if ct := rec.Header().Get("Content-Type"); ct != "application/json" {
-					t.Errorf("Content-Type = %q, want application/json", ct)
-				}
+				assert.Equal(t, "application/json", rec.Header().Get("Content-Type"))
 			}
 		})
 	}
