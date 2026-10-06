@@ -2,6 +2,11 @@
 // status logic behind the makeutility CLI's sync and status subcommands.
 package gitops
 
+import (
+	"fmt"
+	"path/filepath"
+)
+
 // RepoSpec describes a repo the CLI should manage locally. It is the
 // common shape whether the list comes from makeutility-api or from the
 // local repos.yaml fallback.
@@ -32,4 +37,22 @@ type RepoState struct {
 	Fetched bool
 	// Err is set when clone, fetch, or status inspection failed.
 	Err error
+}
+
+// safeRepoPath joins workspaceDir and name, rejecting names that would
+// escape the workspace via "..", absolute paths, or path separators.
+func safeRepoPath(workspaceDir, name string) (string, error) {
+	if name == "" || name == "." || name == ".." || name != filepath.Base(name) {
+		return "", fmt.Errorf("invalid repo name %q", name)
+	}
+	return filepath.Join(workspaceDir, name), nil
+}
+
+// concurrencyLimit returns a positive worker limit. errgroup.SetLimit(0)
+// never schedules work, so a non-positive value would deadlock Sync/Status.
+func concurrencyLimit(maxConcurrent int) int {
+	if maxConcurrent < 1 {
+		return 1
+	}
+	return maxConcurrent
 }

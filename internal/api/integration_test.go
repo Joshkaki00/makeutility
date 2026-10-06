@@ -254,3 +254,100 @@ func TestIntegration_AuthRequired(t *testing.T) {
 		t.Errorf("status without X-API-Key = %d, want %d", resp.StatusCode, http.StatusUnauthorized)
 	}
 }
+
+func TestIntegration_InactiveReposExcludedFromList(t *testing.T) {
+	srv := newTestServer(t)
+
+	createResp := doJSON(t, http.MethodPost, srv.URL+"/repos/", testAPIKey, map[string]any{
+		"name": "active-one", "url": "https://example.com/a.git", "owner": "team",
+	})
+	var created repo
+	if err := json.NewDecoder(createResp.Body).Decode(&created); err != nil {
+		t.Fatalf("decode create: %v", err)
+	}
+	_ = createResp.Body.Close()
+	if createResp.StatusCode != http.StatusCreated {
+		t.Fatalf("create status = %d, want 201", createResp.StatusCode)
+	}
+
+	// Second repo created already inactive.
+	inactiveResp := doJSON(t, http.MethodPost, srv.URL+"/repos/", testAPIKey, map[string]any{
+		"name": "inactive-one", "url": "https://example.com/b.git", "owner": "team", "active": false,
+	})
+	_ = inactiveResp.Body.Close()
+	if inactiveResp.StatusCode != http.StatusCreated {
+		t.Fatalf("create inactive status = %d, want 201", inactiveResp.StatusCode)
+	}
+
+	// Deactivate the first via PATCH (README's documented flow).
+	patchResp := doJSON(t, http.MethodPatch, srv.URL+"/repos/"+strconv.FormatInt(created.ID, 10), testAPIKey, map[string]any{
+		"active": false,
+	})
+	_ = patchResp.Body.Close()
+	if patchResp.StatusCode != http.StatusOK {
+		t.Fatalf("patch status = %d, want 200", patchResp.StatusCode)
+	}
+
+	listResp := doJSON(t, http.MethodGet, srv.URL+"/repos/", testAPIKey, nil)
+	defer func() { _ = listResp.Body.Close() }()
+	if listResp.StatusCode != http.StatusOK {
+		t.Fatalf("list status = %d, want 200", listResp.StatusCode)
+	}
+	var got []repo
+	if err := json.NewDecoder(listResp.Body).Decode(&got); err != nil {
+		t.Fatalf("decode list: %v", err)
+	}
+	if len(got) != 0 {
+		t.Fatalf("active list = %#v, want empty after deactivating all repos", got)
+	}
+}
+
+func TestIntegration_UpdateValidationEdges(t *testing.T) {
+	srv := newTestServer(t)
+
+	createResp := doJSON(t, http.MethodPost, srv.URL+"/repos/", testAPIKey, map[string]any{
+		"name": "edge-update", "url": "https://example.com/orig.git", "owner": "owner-a",
+	})
+	var created repo
+	if err := json.NewDecoder(createResp.Body).Decode(&created); err != nil {
+		t.Fatalf("decode create: %v", err)
+	}
+	_ = createResp.Body.Close()
+
+	t.Run("clear tags with empty array", func(t *testing.T) {
+		resp := doJSON(t, http.MethodPatch, srv.URL+"/repos/"+strconv.FormatInt(created.ID, 10), testAPIKey, map[string]any{
+			"tags": []string{},
+		})
+		defer func() { _ = resp.Body.Close() }()
+		if resp.StatusCode != http.StatusOK {
+			t.Fatalf("status = %d, want 200", resp.StatusCode)
+		}
+		var updated repo
+		if err := json.NewDecoder(resp.Body).Decode(&updated); err != nil {
+			t.Fatalf("decode: %v", err)
+		}
+		if updated.Tags == nil {
+			t.Fatal("tags = nil, want non-nil empty slice in JSON")
+		}
+		if len(updated.Tags) != 0 {
+			t.Errorf("tags = %#v, want empty", updated.Tags)
+		}
+	})
+
+	t.Run("malformed json body", func(t *testing.T) {
+		req, err := http.NewRequest(http.MethodPatch, srv.URL+"/repos/"+strconv.FormatInt(created.ID, 10), strings.NewReader(`{bad`))
+		if err != nil {
+			t.Fatalf("new request: %v", err)
+		}
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("X-API-Key", testAPIKey)
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			t.Fatalf("do: %v", err)
+		}
+		defer func() { _ = resp.Body.Close() }()
+		if resp.StatusCode != http.StatusBadRequest {
+			t.Errorf("status = %d, want 400", resp.StatusCode)
+		}
+	})
+}

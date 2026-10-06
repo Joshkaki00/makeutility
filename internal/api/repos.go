@@ -2,11 +2,13 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/jackc/pgx/v5"
 
 	"github.com/joshuakaki/makeutility/internal/db"
 )
@@ -47,8 +49,10 @@ func toRepos(rows []db.Repo) []repo {
 }
 
 // listRepos handles GET /repos.
+// Only active repos are returned so deactivated entries do not keep
+// showing up in the CLI sync/status list (see ListActiveRepos).
 func (s *Server) listRepos(w http.ResponseWriter, r *http.Request) {
-	rows, err := s.queries.ListRepos(r.Context())
+	rows, err := s.queries.ListActiveRepos(r.Context())
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "failed to list repos: "+err.Error())
 		return
@@ -134,7 +138,11 @@ func (s *Server) updateRepo(w http.ResponseWriter, r *http.Request) {
 
 	updated, err := s.queries.UpdateRepo(r.Context(), params)
 	if err != nil {
-		writeError(w, http.StatusNotFound, "repo not found or update failed: "+err.Error())
+		if errors.Is(err, pgx.ErrNoRows) {
+			writeError(w, http.StatusNotFound, "repo not found")
+			return
+		}
+		writeError(w, http.StatusInternalServerError, "failed to update repo: "+err.Error())
 		return
 	}
 	writeJSON(w, http.StatusOK, toRepo(updated))

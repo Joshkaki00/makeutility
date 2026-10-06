@@ -4,7 +4,6 @@ import (
 	"context"
 	"os"
 	"os/exec"
-	"path/filepath"
 
 	"golang.org/x/sync/errgroup"
 )
@@ -22,7 +21,7 @@ func Sync(ctx context.Context, workspaceDir string, specs []RepoSpec, maxConcurr
 	states := make([]RepoState, len(specs))
 
 	g, ctx := errgroup.WithContext(ctx)
-	g.SetLimit(maxConcurrent)
+	g.SetLimit(concurrencyLimit(maxConcurrent))
 
 	for i, spec := range specs {
 		i, spec := i, spec
@@ -38,7 +37,11 @@ func Sync(ctx context.Context, workspaceDir string, specs []RepoSpec, maxConcurr
 
 func syncOne(ctx context.Context, workspaceDir string, spec RepoSpec) RepoState {
 	state := RepoState{Name: spec.Name}
-	repoPath := filepath.Join(workspaceDir, spec.Name)
+	repoPath, err := safeRepoPath(workspaceDir, spec.Name)
+	if err != nil {
+		state.Err = err
+		return state
+	}
 
 	if _, err := os.Stat(repoPath); os.IsNotExist(err) {
 		if err := runGit(ctx, workspaceDir, "clone", spec.URL, spec.Name); err != nil {

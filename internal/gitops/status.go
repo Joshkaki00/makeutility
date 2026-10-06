@@ -4,7 +4,6 @@ import (
 	"context"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -22,7 +21,7 @@ func Status(ctx context.Context, workspaceDir string, specs []RepoSpec, maxConcu
 	states := make([]RepoState, len(specs))
 
 	g, ctx := errgroup.WithContext(ctx)
-	g.SetLimit(maxConcurrent)
+	g.SetLimit(concurrencyLimit(maxConcurrent))
 
 	for i, spec := range specs {
 		i, spec := i, spec
@@ -38,7 +37,11 @@ func Status(ctx context.Context, workspaceDir string, specs []RepoSpec, maxConcu
 
 func statusOne(ctx context.Context, workspaceDir string, spec RepoSpec) RepoState {
 	state := RepoState{Name: spec.Name}
-	repoPath := filepath.Join(workspaceDir, spec.Name)
+	repoPath, err := safeRepoPath(workspaceDir, spec.Name)
+	if err != nil {
+		state.Err = err
+		return state
+	}
 
 	if _, err := os.Stat(repoPath); os.IsNotExist(err) {
 		state.Err = errNotCloned
