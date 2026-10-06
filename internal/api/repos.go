@@ -68,6 +68,9 @@ type createRepoRequest struct {
 	Active *bool    `json:"active"`
 }
 
+// BUG(Joshkaki00): Unique-constraint violations (duplicate name) are
+// returned as HTTP 500 instead of 409 Conflict.
+
 // createRepo handles POST /repos.
 func (s *Server) createRepo(w http.ResponseWriter, r *http.Request) {
 	var req createRepoRequest
@@ -107,6 +110,9 @@ type updateRepoRequest struct {
 	Tags   []string `json:"tags"`
 	Active *bool    `json:"active"`
 }
+
+// BUG(Joshkaki00): Sending "url":"" or "owner":"" in PATCH clears the
+// stored value; omit the JSON key to leave a field unchanged.
 
 // updateRepo handles PATCH /repos/{id}.
 func (s *Server) updateRepo(w http.ResponseWriter, r *http.Request) {

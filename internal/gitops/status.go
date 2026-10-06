@@ -10,9 +10,13 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-// Status concurrently inspects every repo in specs that exists locally
-// under workspaceDir and reports its branch, ahead/behind counts, and
-// dirty/clean state.
+// BUG(Joshkaki00): When a repo has no upstream configured, the rev-list
+// against @{upstream} fails and Ahead/Behind stay 0, which looks identical
+// to "fully in sync" instead of "upstream unknown".
+
+// Status inspects every repo in specs that exists locally under
+// workspaceDir and reports its branch, ahead/behind counts, and
+// dirty/clean state. Work runs concurrently with a bounded worker pool.
 //
 // The returned slice is aligned with specs: states[i] describes specs[i].
 // Missing or unreadable repos set RepoState.Err; Status does not fail the
@@ -85,4 +89,5 @@ var errNotCloned = &notClonedError{}
 
 type notClonedError struct{}
 
+// Error returns a stable message for repos that are not present locally.
 func (e *notClonedError) Error() string { return "repo not cloned locally" }

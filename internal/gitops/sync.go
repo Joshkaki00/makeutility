@@ -80,10 +80,12 @@ type gitError struct {
 	cause  error
 }
 
+// Error formats the failed git invocation, including stderr/stdout output.
 func (e *gitError) Error() string {
 	return "git " + joinArgs(e.args) + ": " + e.cause.Error() + "\n" + e.output
 }
 
+// Unwrap returns the underlying exec error from the git command.
 func (e *gitError) Unwrap() error { return e.cause }
 
 func joinArgs(args []string) string {
