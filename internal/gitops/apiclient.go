@@ -14,7 +14,10 @@ type apiRepo struct {
 }
 
 // FetchReposFromAPI calls GET /repos on makeutility-api and returns the
-// active repo list as RepoSpecs.
+// active repo list as RepoSpecs. baseURL is the API origin without a
+// trailing path (for example "http://localhost:8080"); apiKey is sent in
+// the X-API-Key header. Non-200 responses and network/decode failures
+// return an error.
 func FetchReposFromAPI(ctx context.Context, baseURL, apiKey string) ([]RepoSpec, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, baseURL+"/repos/", nil)
 	if err != nil {

@@ -14,6 +14,10 @@ import (
 // across a bounded pool of goroutines (via errgroup.SetLimit) so a large
 // repo list finishes in roughly the time of the slowest single repo,
 // rather than the sum of all of them.
+//
+// The returned slice is aligned with specs: states[i] describes specs[i].
+// Individual failures appear on RepoState.Err; Sync itself does not return
+// an error for per-repo problems.
 func Sync(ctx context.Context, workspaceDir string, specs []RepoSpec, maxConcurrent int) []RepoState {
 	states := make([]RepoState, len(specs))
 

@@ -14,6 +14,10 @@ import (
 // Status concurrently inspects every repo in specs that exists locally
 // under workspaceDir and reports its branch, ahead/behind counts, and
 // dirty/clean state.
+//
+// The returned slice is aligned with specs: states[i] describes specs[i].
+// Missing or unreadable repos set RepoState.Err; Status does not fail the
+// whole batch for a single bad path.
 func Status(ctx context.Context, workspaceDir string, specs []RepoSpec, maxConcurrent int) []RepoState {
 	states := make([]RepoState, len(specs))
 

@@ -18,6 +18,13 @@ Items marked with a star earn bonus points.
 | 0 | +1.5 | All tests pass | x |
 | - | +0.0 | Academic dishonesty: code copied from another student | n/a |
 
+## Day 12 – Documentation
+
+| # | Points | Requirement | Done |
+|---|---|---|---|
+| D1 | n/a | Godoc comments on public types/funcs/packages (≥5) | x |
+| D2 | n/a | Local godoc browsable (`godoc -http=:8080`) | x |
+
 ## Notes on current status (as of this commit)
 
 - **#1**: `go build ./...`, `go vet ./...`, and `golangci-lint run
