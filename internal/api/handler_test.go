@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/joshuakaki/makeutility/internal/db"
+	"github.com/Joshkaki00/makeutility/internal/db"
 )
 
 // handlerTestServer builds NewServer with a nil DBTX. Only paths that

@@ -6,7 +6,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
-	"github.com/joshuakaki/makeutility/internal/db"
+	"github.com/Joshkaki00/makeutility/internal/db"
 )
 
 // Server holds the dependencies shared by all HTTP handlers.

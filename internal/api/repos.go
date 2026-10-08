@@ -10,7 +10,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/jackc/pgx/v5"
 
-	"github.com/joshuakaki/makeutility/internal/db"
+	"github.com/Joshkaki00/makeutility/internal/db"
 )
 
 // repo is the JSON wire representation of a repos row. We map away from the

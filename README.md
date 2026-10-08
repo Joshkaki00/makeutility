@@ -191,7 +191,7 @@ API already owns `:8080`):
 ```bash
 go install golang.org/x/tools/cmd/godoc@v0.25.0
 godoc -http=:6060
-# open http://localhost:6060/pkg/github.com/joshuakaki/makeutility/
+# open http://localhost:6060/pkg/github.com/Joshkaki00/makeutility/
 ```
 
 ### Testing

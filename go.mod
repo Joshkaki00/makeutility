@@ -1,4 +1,4 @@
-module github.com/joshuakaki/makeutility
+module github.com/Joshkaki00/makeutility
 
 go 1.27.1
 

@@ -28,7 +28,7 @@ import (
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
 
-	"github.com/joshuakaki/makeutility/internal/db"
+	"github.com/Joshkaki00/makeutility/internal/db"
 )
 
 const testAPIKey = "integration-test-key"
@@ -146,7 +146,7 @@ func TestIntegration_CreateAndListRepos(t *testing.T) {
 	}{
 		{
 			name:       "valid repo is created",
-			body:       map[string]any{"name": "makeutility", "url": "https://example.com/makeutility.git", "owner": "joshuakaki"},
+			body:       map[string]any{"name": "makeutility", "url": "https://example.com/makeutility.git", "owner": "Joshkaki00"},
 			wantStatus: http.StatusCreated,
 		},
 		{

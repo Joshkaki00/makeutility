@@ -6,7 +6,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgtype"
 
-	"github.com/joshuakaki/makeutility/internal/db"
+	"github.com/Joshkaki00/makeutility/internal/db"
 )
 
 func TestToRepo(t *testing.T) {
@@ -25,7 +25,7 @@ func TestToRepo(t *testing.T) {
 				ID:        1,
 				Name:      "makeutility",
 				Url:       "https://example.com/makeutility.git",
-				Owner:     "joshuakaki",
+				Owner:     "Joshkaki00",
 				Tags:      []string{"go", "cli"},
 				Active:    true,
 				CreatedAt: pgtype.Timestamptz{Time: fixedTime, Valid: true},
@@ -35,7 +35,7 @@ func TestToRepo(t *testing.T) {
 				ID:        1,
 				Name:      "makeutility",
 				URL:       "https://example.com/makeutility.git",
-				Owner:     "joshuakaki",
+				Owner:     "Joshkaki00",
 				Tags:      []string{"go", "cli"},
 				Active:    true,
 				CreatedAt: fixedTime,

@@ -11,7 +11,7 @@ import (
 	"syscall"
 	"text/tabwriter"
 
-	"github.com/joshuakaki/makeutility/internal/gitops"
+	"github.com/Joshkaki00/makeutility/internal/gitops"
 )
 
 const (

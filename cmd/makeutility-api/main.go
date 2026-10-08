@@ -15,8 +15,8 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/joshuakaki/makeutility/internal/api"
-	"github.com/joshuakaki/makeutility/internal/db"
+	"github.com/Joshkaki00/makeutility/internal/api"
+	"github.com/Joshkaki00/makeutility/internal/db"
 )
 
 func main() {
